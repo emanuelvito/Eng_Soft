@@ -43,12 +43,32 @@ DADOS_ARMAZENADOS = pd.DataFrame(
 ss = st.session_state
 ss.setdefault("status_rota", ["Aguardando"] * len(ROTA))
 ss.setdefault("onda_ativa", False)
+ss.setdefault("animar", False)
+ss.setdefault("aviso_cancelado", False)
 ss.setdefault("auditoria", [])
 ss.setdefault("anonimizacao_auto", True)
 
 
 def log(evento: str):
     ss.auditoria.append({"Data/hora": datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "Evento": evento})
+
+
+# ----------------------------- Callbacks dos botões -----------------------------
+# Callbacks rodam ANTES do rerun do script, então os botões já são desenhados
+# com o estado atualizado (resolve a necessidade de clicar duas vezes).
+def ativar_onda(veiculo, destino):
+    ss.onda_ativa = True
+    ss.animar = True
+    ss.aviso_cancelado = False
+    log(f"Onda verde ativada: {veiculo} → {destino}")
+
+
+def cancelar_onda():
+    ss.onda_ativa = False
+    ss.animar = False
+    ss.aviso_cancelado = True
+    ss.status_rota = ["Aguardando"] * len(ROTA)
+    log("Onda verde cancelada pelo operador")
 
 
 # ----------------------------- Navegação -----------------------------
@@ -118,12 +138,11 @@ if pagina == "Onda verde (SAMU)":
         st.caption("🔴 Ambulância · 🔵 Destino · ⚪ Aguardando · 🟡 Transição segura · 🟢 Verde garantido (rota verde = onda ativa)")
 
         b1, b2, _ = st.columns([1, 1, 2])
-        ativar = b1.button("Ativar onda verde", type="primary", disabled=ss.onda_ativa)
-        cancelar = b2.button("Cancelar", disabled=not ss.onda_ativa)
+        b1.button("Ativar onda verde", type="primary", disabled=ss.onda_ativa,
+                  on_click=ativar_onda, args=(veiculo, destino))
+        b2.button("Cancelar", disabled=not ss.onda_ativa, on_click=cancelar_onda)
 
-    if ativar:
-        ss.onda_ativa = True
-        log(f"Onda verde ativada: {veiculo} → {destino}")
+    if ss.animar:
         inicio = time.time()
         for i, c in enumerate(ROTA):
             # Regra de negócio: a IA não viola amarelo e vermelho geral mínimos
@@ -135,16 +154,11 @@ if pagina == "Onda verde (SAMU)":
             desenha_status()
             desenha_mapa()
             log(f"{c['nome']}: verde garantido (amarelo {AMARELO_MIN_S}s + vermelho geral {VERMELHO_GERAL_S}s respeitados)")
+        ss.animar = False
         latencia = time.time() - inicio
         st.success(f"Onda verde ativa. Tempo de resposta da simulação: {latencia:.1f} s (meta do sistema: < 5 s em campo).")
-
-    if cancelar:
-        ss.onda_ativa = False
-        ss.status_rota = ["Aguardando"] * len(ROTA)
-        log("Onda verde cancelada pelo operador")
+    elif ss.aviso_cancelado:
         st.warning("Onda verde cancelada. Os cruzamentos voltaram ao modo automático (IA).")
-        desenha_status()
-        desenha_mapa()
 
 # ======================= ENCARREGADO DE CONFORMIDADE =======================
 else:

@@ -59,7 +59,6 @@ pagina = st.sidebar.radio("Perfil", ["Onda verde (SAMU)", "Painel LGPD (Conformi
 # ============================ SOCORRISTA DO SAMU ============================
 if pagina == "Onda verde (SAMU)":
     st.title("Onda verde para emergências (SAMU)")
-    st.caption("UC3 · EU 3 — priorização automática respeitando os tempos mínimos de segurança")
 
     col_mapa, col_info = st.columns([2, 1])
 
@@ -150,7 +149,6 @@ if pagina == "Onda verde (SAMU)":
 # ======================= ENCARREGADO DE CONFORMIDADE =======================
 else:
     st.title("Painel LGPD")
-    st.caption("EU 6 — inventário de dados, anonimização e relatório de auditoria")
 
     anon_pct = 100 if ss.anonimizacao_auto else 60
     c1, c2, c3 = st.columns(3)

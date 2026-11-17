@@ -1,8 +1,3 @@
-"""SIA - Otimização Inteligente de Semáforos
-Protótipo Streamlit: Socorrista do SAMU (UC3) e Encarregado de conformidade (UC7/UC8).
-Execute com:  streamlit run app.py
-Todos os dados são simulados (não há integração real com SUMO ou semáforos).
-"""
 import time
 from datetime import datetime
 
@@ -155,7 +150,7 @@ if pagina == "Onda verde (SAMU)":
 # ======================= ENCARREGADO DE CONFORMIDADE =======================
 else:
     st.title("Painel LGPD")
-    st.caption("UC7 / UC8 · EU 6 — inventário de dados, anonimização e relatório de auditoria")
+    st.caption("EU 6 — inventário de dados, anonimização e relatório de auditoria")
 
     anon_pct = 100 if ss.anonimizacao_auto else 60
     c1, c2, c3 = st.columns(3)
